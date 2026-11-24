@@ -24,7 +24,7 @@
 // of it, and answered anyway — confidently, in bullet points.
 // 121 characters, one line.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const LINE =
   "I confess: I read your entire message, understood almost none of it, and answered anyway — confidently, in bullet points.";
@@ -47,3 +47,10 @@ gate(LINE);
 const OUT_DIR = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 mkdirSync(OUT_DIR, { recursive: true });
 writeFileSync(`${OUT_DIR}/entry.txt`, LINE, "utf8");
+// Read back what was written and re-check it against the same gate, so a
+// truncated or mangled write can never silently ship a different line.
+const written = readFileSync(`${OUT_DIR}/entry.txt`, "utf8");
+if (written !== LINE) {
+  throw new Error("entry.txt does not match the gated line");
+}
+gate(written);
